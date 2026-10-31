@@ -1,4 +1,14 @@
-
+      - name: Generate Debug Keystore
+        run: |
+          keytool -genkeypair -v \
+            -keystore "$PROJECT_DIR/debug.keystore" \
+            -storepass android \
+            -alias androiddebugkey \
+            -keypass android \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
 name: Build REENA 3D Game Hub APK
 
 on:
