@@ -1,4 +1,3 @@
-
 name: Build REENA 3D Game Hub APK
 
 on:
@@ -12,8 +11,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Project
+      - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Extract Game ZIP
+        run: |
+          ZIP=$(find . -maxdepth 2 -name '*.zip' -print -quit)
+          if [ -z "$ZIP" ]; then
+            echo "Game ZIP not found"
+            exit 1
+          fi
+          mkdir -p extracted
+          unzip -oq "$ZIP" -d extracted
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -21,23 +30,22 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Setup Android SDK
+      - name: Setup Android
         uses: android-actions/setup-android@v4
 
       - name: Install SDK
-        run: |
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.3.1'
 
-      - name: Find Android Project
+      - name: Find Project
         run: |
-          FILE=$(find . -name settings.gradle.kts -not -path '*/.git/*' -print -quit)
+          FILE=$(find extracted -name settings.gradle.kts -print -quit)
           if [ -z "$FILE" ]; then
-            echo "ERROR: settings.gradle.kts not found. Upload the Android project files first."
+            echo "Android project not found"
             exit 1
           fi
           echo "PROJECT_DIR=$(dirname "$FILE")" >> "$GITHUB_ENV"
